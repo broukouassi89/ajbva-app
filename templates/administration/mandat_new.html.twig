@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+{% block title %}Attribuer un mandat{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header"><h3 class="card-title">Nomination au Bureau</h3></div>
+    <div class="card-body">
+        {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_label(form.membre, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.membre, {'attr': {'class': 'form-control form-select'}}) }}
+                {{ form_errors(form.membre) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.poste, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.poste, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.poste) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.dateDebut, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateDebut) }}
+            </div>
+            <div class="mt-16">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-check-circle"></i> Enregistrer la nomination
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

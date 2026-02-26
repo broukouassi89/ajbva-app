@@ -1,0 +1,196 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau membre{% endblock %}
+{% block breadcrumb %}
+  <span class="breadcrumb-sep">/</span>
+  <a href="{{ path('membre_index') }}" style="color:#64748b;">Membres</a>
+  <span class="breadcrumb-sep">/</span>
+  <span class="breadcrumb-current">Nouveau membre</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Nouveau membre</div>
+    <div class="page-subtitle">Enregistrement d'un nouvel adhérent AJBVA</div>
+  </div>
+  <a href="{{ path('membre_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour</a>
+</div>
+
+{{ form_start(form, {attr: {enctype: 'multipart/form-data', id: 'membreForm', novalidate: 'novalidate'}}) }}
+
+<div style="display:grid; grid-template-columns: 1fr 320px; gap:22px; align-items:start;">
+
+  {# Formulaire principal #}
+  <div style="display:flex; flex-direction:column; gap:18px;">
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-user"></i> Informations personnelles</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom) }}
+            {{ form_errors(form.nom) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.prenom) }}
+            {{ form_widget(form.prenom, {attr: {oninput: "updateApercu()"}}) }}
+            {{ form_errors(form.prenom) }}
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.genre) }}
+            {{ form_widget(form.genre, {attr: {onchange: "updateGenre(this.value)"}}) }}
+            {{ form_errors(form.genre) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.dateNaissance) }}
+            {{ form_widget(form.dateNaissance) }}
+            <div id="age-display" class="form-hint" style="color:#1a56db; font-weight:600;"></div>
+            {{ form_errors(form.dateNaissance) }}
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.telephone) }}
+            <div style="position:relative;">
+              <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;">🇨🇮</span>
+              {{ form_widget(form.telephone, {attr: {style: 'padding-left: 34px;', placeholder: '+225 07 00 00 00 00'}}) }}
+            </div>
+            {{ form_errors(form.telephone) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.email) }} <span style="font-size:11px; color:#94a3b8;">(optionnel)</span>
+            {{ form_widget(form.email) }}
+            {{ form_errors(form.email) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-id-card"></i> Informations statutaires</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.grandeFamille) }}
+            {{ form_widget(form.grandeFamille) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.villageOrigine) }}
+            {{ form_widget(form.villageOrigine) }}
+          </div>
+        </div>
+        <div class="form-group" style="max-width:280px;">
+          {{ form_label(form.dateAdhesion) }}
+          {{ form_widget(form.dateAdhesion) }}
+          <div id="anciennete-display" class="form-hint" style="color:#10b981; font-weight:600;"></div>
+          {{ form_errors(form.dateAdhesion) }}
+        </div>
+
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; display:flex; gap:12px; align-items:flex-start;">
+          <i class="fas fa-info-circle" style="color:#1a56db; font-size:18px; flex-shrink:0; margin-top:1px;"></i>
+          <div style="font-size:13px; color:#1e40af;">
+            Une cotisation de carte d'adhésion de <strong>5 000 F CFA</strong> sera automatiquement enregistrée à la date d'adhésion renseignée.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn btn-primary btn-lg" style="flex:1; justify-content:center;">
+        <i class="fas fa-user-plus"></i> Enregistrer le membre
+      </button>
+      <a href="{{ path('membre_index') }}" class="btn btn-outline btn-lg">Annuler</a>
+    </div>
+  </div>
+
+  {# Panneau latéral #}
+  <div style="display:flex; flex-direction:column; gap:16px; position:sticky; top:80px;">
+
+    {# Upload Photo #}
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-camera"></i> Photo du membre</span></div>
+      <div class="card-body" style="text-align:center;">
+        <div style="position:relative; display:inline-block; margin-bottom:14px;">
+          <img id="photo-preview-main" class="photo-preview" src="/images/avatar-default.svg" alt="Aperçu"
+               style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+          <label for="{{ form.photoFile.vars.id }}" style="position:absolute;bottom:4px;right:4px;width:32px;height:32px;background:#1a56db;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(26,86,219,.4);">
+            <i class="fas fa-camera" style="color:white;font-size:13px;"></i>
+          </label>
+        </div>
+        {{ form_widget(form.photoFile, {attr: {style:'display:none', onchange:'previewPhoto(this)'}}) }}
+        <div class="form-hint">JPG, PNG ou WebP · Max 2 Mo</div>
+        {{ form_errors(form.photoFile) }}
+      </div>
+    </div>
+
+    {# Carte membre aperçu #}
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-id-badge"></i> Aperçu carte</span></div>
+      <div class="card-body" style="padding:16px;">
+        <div id="carte-membre" style="background:linear-gradient(135deg,#1e293b 0%,#1a56db 100%);border-radius:14px;padding:20px;color:white;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(26,86,219,.3);">
+          <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
+          <div style="position:absolute;bottom:-25px;left:-10px;width:90px;height:90px;background:rgba(255,255,255,.04);border-radius:50%;"></div>
+          <div style="text-align:center; margin-bottom:12px; position:relative;">
+            <img id="apercu-photo" class="photo-preview" src="/images/avatar-default.svg"
+                 style="width:65px;height:65px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.3);">
+          </div>
+          <div style="text-align:center; position:relative;">
+            <div id="apercu-nom" style="font-weight:800; font-size:15px; line-height:1.2;">Prénom NOM</div>
+            <div style="font-size:11px; opacity:.5; margin:3px 0 10px; font-family:monospace;">AJBVA-{{ "now"|date("Y") }}-XXXX</div>
+            <div style="display:flex; justify-content:space-around; background:rgba(255,255,255,.1); border-radius:8px; padding:10px; font-size:11px;">
+              <div style="text-align:center;">
+                <div style="opacity:.6; margin-bottom:2px;">Genre</div>
+                <div id="apercu-genre" style="font-weight:700;">—</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="opacity:.6; margin-bottom:2px;">Âge</div>
+                <div id="apercu-age" style="font-weight:700;">—</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="opacity:.6; margin-bottom:2px;">Statut</div>
+                <div style="font-weight:700; color:#4ade80;">Actif ✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+  // Mise à jour aperçu en temps réel
+  document.querySelectorAll('[name*="[nom]"], [name$="[nom]"], input[name$="[nom]"]').forEach(el => el.addEventListener('input', updateApercu));
+  document.querySelectorAll('[name*="[prenom]"], [name$="[prenom]"]').forEach(el => el.addEventListener('input', updateApercu));
+  document.querySelectorAll('[name*="[date_naissance]"], input[type="date"]').forEach(el => {
+    if (el.name.includes('naissance')) el.addEventListener('change', e => calculerAge(e.target.value));
+  });
+  document.querySelectorAll('[name*="[date_adhesion]"]').forEach(el => el.addEventListener('change', e => calculerAnciennete(e.target.value)));
+
+  function updateApercu() {
+    const nom = document.querySelector('input[name$="[nom]"]')?.value || 'NOM';
+    const prenom = document.querySelector('input[name$="[prenom]"]')?.value || 'Prénom';
+    document.getElementById('apercu-nom').textContent = `${prenom} ${nom.toUpperCase()}`;
+  }
+
+  function updateGenre(val) {
+    document.getElementById('apercu-genre').textContent = val === 'Masculin' ? '♂ M' : val === 'Féminin' ? '♀ F' : '—';
+  }
+
+  // Init valeurs existantes
+  const dnEl = document.querySelector('[name*="date_naissance"]');
+  const daEl = document.querySelector('[name*="date_adhesion"]');
+  if (dnEl?.value) calculerAge(dnEl.value);
+  if (daEl?.value) calculerAnciennete(daEl.value);
+  updateApercu();
+</script>
+{% endblock %}

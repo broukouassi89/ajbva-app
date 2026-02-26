@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des Flux Financiers{% endblock %}
+
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <a href="{{ path('finance_index') }}">Finances</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Historique des Flux</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Historique des Flux</h1>
+        <p class="page-subtitle">Journal complet des entrées et sorties de caisse</p>
+    </div>
+    <div class="page-actions">
+        <button onclick="window.print()" class="btn btn-outline">
+            <i class="fas fa-print"></i> Imprimer
+        </button>
+        <a href="{{ path('finance_index') }}" class="btn btn-ghost"> Retour</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-exchange-alt"></i> Toutes les transactions</h3>
+    </div>
+    <div class="table-wrap">
+        <table class="table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Catégorie</th>
+                    <th>Libellé / Détails</th>
+                    <th>Référence</th>
+                    <th style="text-align: right">Débit (Sortie)</th>
+                    <th style="text-align: right">Crédit (Entrée)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set solde_cumule = 0 %}
+                {% for f in flux %}
+                <tr>
+                    <td class="text-muted">{{ f.date|date('d/m/Y') }}</td>
+                    <td>
+                        <span class="badge {{ f.type == 'Entrée' ? 'badge-success' : 'badge-danger' }}">
+                            {{ f.type }}
+                        </span>
+                    </td>
+                    <td><small class="text-muted">{{ f.categorie }}</small></td>
+                    <td class="fw-600">{{ f.libelle }}</td>
+                    <td class="font-mono text-muted">{{ f.reference }}</td>
+                    <td style="text-align: right" class="text-danger fw-700">
+                        {% if f.type == 'Sortie' %}- {{ f.montant|number_format(0, ',', ' ') }} F{% endif %}
+                    </td>
+                    <td style="text-align: right" class="text-success fw-700">
+                        {% if f.type == 'Entrée' %}+ {{ f.montant|number_format(0, ',', ' ') }} F{% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">Aucun flux financier enregistré.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+@media print {
+    .sidebar, .app-header, .page-actions, .btn-ghost { display: none !important; }
+    .app-main { margin-left: 0 !important; padding-top: 0 !important; }
+    .content-wrapper { padding: 0 !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    table { font-size: 11px !important; }
+}
+</table-wrap>
+{% endblock %}

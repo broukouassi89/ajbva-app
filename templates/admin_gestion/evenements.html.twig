@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+{% block title %}Calendrier & PV{% endblock %}
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Calendrier</span>
+{% endblock %}
+{% block header_actions %}
+    {% if is_granted('ROLE_BUREAU') %}
+    <a href="{{ path('admin_evenement_new') }}" class="header-btn primary"><i class="fas fa-plus"></i> Événement</a>
+    {% endif %}
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Calendrier & Réunions</h1>
+        <p class="page-subtitle">Suivi des événements et comptes-rendus</p>
+    </div>
+</div>
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Événement</th>
+                    <th>Lieu</th>
+                    <th>Type</th>
+                    <th>PV / Compte-rendu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in evenements %}
+                <tr>
+                    <td class="fw-600">{{ e.dateDebut|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <div class="fw-700">{{ e.titre }}</div>
+                        <small class="text-muted">{{ e.description }}</small>
+                    </td>
+                    <td>{{ e.lieu ?? '—' }}</td>
+                    <td><span class="badge badge-info">{{ e.type }}</span></td>
+                    <td>
+                        {% if e.procesVerbal %}
+                            <button class="btn btn-sm btn-outline" onclick="alert('{{ e.procesVerbal.contenu|escape('js') }}')">
+                                <i class="fas fa-file-alt"></i> Voir PV
+                            </button>
+                        {% else %}
+                            {% if is_granted('ROLE_BUREAU') %}
+                            <a href="{{ path('admin_pv_new', {id: e.id}) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-pen"></i> Rédiger PV
+                            </a>
+                            {% else %}
+                            <span class="text-muted italic">Non disponible</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center py-4">Aucun événement enregistré.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

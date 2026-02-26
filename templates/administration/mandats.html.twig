@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mandats du Bureau{% endblock %}
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Mandats</span>
+{% endblock %}
+{% block header_actions %}
+    <a href="{{ path('admin_mandat_new') }}" class="header-btn primary"><i class="fas fa-plus"></i> Nouveau Mandat</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Membres du Bureau</h1>
+        <p class="page-subtitle">Historique et mandats en cours</p>
+    </div>
+</div>
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Membre</th>
+                    <th>Poste / Responsabilité</th>
+                    <th>Début</th>
+                    <th>Fin</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in mandats %}
+                <tr>
+                    <td>
+                        <a href="{{ path('membre_show', {id: m.membre.id}) }}" class="fw-700">{{ m.membre.nomComplet }}</a>
+                    </td>
+                    <td class="fw-600 text-primary">{{ m.poste }}</td>
+                    <td>{{ m.dateDebut|date('d/m/Y') }}</td>
+                    <td>{{ m.dateFin ? m.dateFin|date('d/m/Y') : '—' }}</td>
+                    <td>
+                        <span class="badge {{ m.statut == 'En cours' ? 'badge-success' : 'badge-secondary' }}">
+                            {{ m.statut }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center py-4">Aucun mandat enregistré.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

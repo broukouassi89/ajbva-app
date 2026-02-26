@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    default_path: '%kernel.project_dir%/templates'
+    globals:
+        app_name: 'AJBVA'
+        app_description: 'Association des Jeunes de Botro Villages à Abidjan'
 
 when@test:
     twig:

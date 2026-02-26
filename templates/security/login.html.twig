@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — AJBVA</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',-apple-system,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;background:#0f172a}
+    .bg-shape{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+    .bg-1{width:500px;height:500px;background:#1a56db;top:-100px;right:-100px}
+    .bg-2{width:400px;height:400px;background:#7c3aed;bottom:-80px;left:-80px}
+    .bg-3{width:300px;height:300px;background:#0ea5e9;top:50%;left:50%;transform:translate(-50%,-50%)}
+    .login-wrap{width:100%;max-width:420px;position:relative;z-index:10}
+    .login-header{text-align:center;margin-bottom:32px}
+    .login-logo{width:80px;height:80px;background:white;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#1a56db;margin-bottom:20px;box-shadow:0 8px 32px rgba(26,86,219,.3)}
+    .login-title{color:white;font-size:26px;font-weight:800;margin-bottom:6px}
+    .login-sub{color:rgba(255,255,255,.5);font-size:13px}
+    .login-card{background:white;border-radius:20px;padding:36px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
+    .login-card h2{font-size:20px;font-weight:800;color:#1e293b;margin-bottom:6px}
+    .login-desc{color:#64748b;font-size:13px;margin-bottom:28px}
+    .form-group{margin-bottom:18px}
+    .form-label{display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:6px}
+    .input-wrap{position:relative}
+    .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:15px}
+    .form-control{width:100%;padding:11px 13px 11px 40px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b;outline:none;transition:border-color .2s,box-shadow .2s}
+    .form-control:focus{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+    .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#1a56db,#3b82f6);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+    .btn-login:hover{opacity:.9}
+    .alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:13.5px;display:flex;align-items:center;gap:8px}
+    .login-accounts{margin-top:24px;background:#f8fafc;border-radius:12px;padding:16px}
+    .login-accounts h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:700;margin-bottom:12px}
+    .account-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9}
+    .account-item:last-child{border-bottom:none}
+    .account-role{font-size:12px;font-weight:600;color:#1e293b}
+    .account-cred{font-size:11px;color:#64748b;font-family:monospace}
+    .footer-note{text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,.3)}
+  </style>
+</head>
+<body>
+  <div class="bg-shape bg-1"></div>
+  <div class="bg-shape bg-2"></div>
+  <div class="bg-shape bg-3"></div>
+
+  <div class="login-wrap">
+    <div class="login-header">
+      <div class="login-logo">A</div>
+      <div class="login-title">AJBVA</div>
+      <div class="login-sub">Association des Jeunes de Botro Villages à Abidjan</div>
+    </div>
+
+    <div class="login-card">
+      <h2>Connexion</h2>
+      <p class="login-desc">Accédez à votre espace de gestion associative</p>
+
+      {% if error %}
+        <div class="alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{{ path('security_login') }}">
+        <div class="form-group">
+          <label class="form-label" for="email">Adresse email</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" name="email" class="form-control"
+                   value="{{ last_username }}" placeholder="vous@example.com"
+                   required autocomplete="email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Mot de passe</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" name="password" class="form-control"
+                   placeholder="••••••••" required autocomplete="current-password">
+          </div>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit" class="btn-login">
+          <i class="fas fa-sign-in-alt"></i> Se connecter
+        </button>
+      </form>
+
+      {# Comptes de démo #}
+      <div class="login-accounts">
+        <h3>Comptes de démonstration</h3>
+        <div class="account-item">
+          <span class="account-role">🔑 Super Admin</span>
+          <span class="account-cred">admin@ajbva.ci / Admin@2024!</span>
+        </div>
+        <div class="account-item">
+          <span class="account-role">🏛️ Bureau</span>
+          <span class="account-cred">bureau@ajbva.ci / Bureau@2024!</span>
+        </div>
+        <div class="account-item">
+          <span class="account-role">❤️ VP Social</span>
+          <span class="account-cred">vp.social@ajbva.ci / VPSocial@2024!</span>
+        </div>
+        <div class="account-item">
+          <span class="account-role">👤 Membre</span>
+          <span class="account-cred">jean.kouassi@email.com / Membre@2024!</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note">© {{ "now"|date("Y") }} AJBVA · Symfony 7 · Tous droits réservés</p>
+  </div>
+</body>
+</html>

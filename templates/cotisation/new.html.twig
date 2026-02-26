@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+{% block title %}Enregistrer un paiement{% endblock %}
+{% block breadcrumb %}<span class="breadcrumb-sep">/</span><a href="{{ path('cotisation_index') }}" style="color:#64748b;">Cotisations</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">Nouveau paiement</span>{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">Enregistrer un paiement</div><div class="page-subtitle">Saisie d'une cotisation mensuelle, exceptionnelle ou sociale</div></div>
+  <a href="{{ path('cotisation_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour</a>
+</div>
+
+<div style="max-width:680px;">
+  {{ form_start(form) }}
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title"><i class="fas fa-user"></i> Membre</span></div>
+      <div class="card-body">
+        {% if membrePreselectionne %}
+          <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:16px;">
+            <img src="{{ membrePreselectionne.photoUrl }}" class="avatar avatar-md" onerror="this.src='/images/avatar-default.svg'">
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:16px;">{{ membrePreselectionne.nomComplet }}</div>
+              <div style="font-size:12px;color:#94a3b8;font-family:monospace;">{{ membrePreselectionne.identifiant }}</div>
+            </div>
+            <span class="badge {{ membrePreselectionne.statutBadgeClass }}">{{ membrePreselectionne.statut }}</span>
+            <a href="{{ path('cotisation_new') }}" class="btn btn-ghost btn-sm" title="Changer"><i class="fas fa-exchange-alt"></i></a>
+          </div>
+          <div style="display:none;">{{ form_row(form.membre) }}</div>
+        {% else %}
+          <div class="form-group" style="margin:0;">
+            {{ form_label(form.membre, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.membre, {'attr': {'class': 'form-control form-select'}}) }}
+            {{ form_errors(form.membre) }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-coins"></i> Détails du paiement</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-control form-select', 'id': 'typeSelect', 'onchange': 'onTypeChange(this.value)'}}) }}
+            {{ form_errors(form.type) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.montant, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'id': 'montantInput'}}) }}
+            {{ form_errors(form.montant) }}
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.datePaiement, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.datePaiement, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.datePaiement) }}
+          </div>
+          <div class="form-group" id="moisGroup">
+            {{ form_label(form.moisConcerne, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.moisConcerne, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.moisConcerne) }}
+          </div>
+        </div>
+        <div class="form-group">
+          {{ form_label(form.note, null, {'label_attr': {'class': 'form-label'}}) }}
+          {{ form_widget(form.note, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.note) }}
+        </div>
+        <div class="form-group">
+          {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label'}}) }}
+          {{ form_widget(form.statut, {'attr': {'class': 'form-control form-select'}}) }}
+          {{ form_errors(form.statut) }}
+        </div>
+
+        <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <i class="fas fa-receipt" style="color:#10b981;font-size:18px;"></i>
+          <span style="font-size:13px;color:#065f46;">Un <strong>reçu numérique</strong> sera automatiquement généré lors de l'enregistrement.</span>
+        </div>
+        <hr>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;"><i class="fas fa-save"></i> Enregistrer le paiement</button>
+          <a href="{{ path('cotisation_index') }}" class="btn btn-outline btn-lg">Annuler</a>
+        </div>
+      </div>
+    </div>
+  {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function onTypeChange(type) {
+  const montantInput = document.getElementById('montantInput');
+  const moisGroup = document.getElementById('moisGroup');
+  
+  // Récupérer les montants paramétrés
+  const montantMensuel = {{ get_setting('cotisation_mensuelle', 1500) }};
+  const montantSocial = {{ get_setting('cotisation_sociale', 1000) }};
+
+  if (type === 'mensuelle') {
+    montantInput.value = montantMensuel;
+    moisGroup.style.display = 'block';
+  } else if (type === 'sociale') {
+    montantInput.value = montantSocial;
+    moisGroup.style.display = 'none';
+  } else {
+    moisGroup.style.display = 'none';
+  }
+}
+// Initialiser au chargement
+document.addEventListener('DOMContentLoaded', () => onTypeChange(document.getElementById('typeSelect').value));
+</script>
+{% endblock %}

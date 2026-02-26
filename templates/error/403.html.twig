@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+{% block title %}Accès refusé — 403{% endblock %}
+
+{% block content %}
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px;">
+  <div style="font-size:80px;font-weight:900;color:#fee2e2;line-height:1;margin-bottom:16px;">403</div>
+  <h1 style="font-size:24px;font-weight:700;color:#1e293b;margin-bottom:8px;">Accès refusé</h1>
+  <p style="color:#64748b;font-size:15px;margin-bottom:28px;max-width:400px;">
+    {{ message ?? "Vous ne disposez pas des droits nécessaires pour accéder à cette page." }}
+  </p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <a href="{{ path('dashboard') }}" class="btn btn-primary btn-lg">
+      <i class="fas fa-home"></i> Tableau de bord
+    </a>
+    <button onclick="history.back()" class="btn btn-outline btn-lg">
+      <i class="fas fa-arrow-left"></i> Retour
+    </button>
+  </div>
+</div>
+{% endblock %}

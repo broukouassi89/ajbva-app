@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ projet.nom }}{% endblock %}
+{% block breadcrumb %}<span class="breadcrumb-sep">/</span><a href="{{ path('projet_index') }}" style="color:#64748b;">Projets</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">{{ projet.nom }}</span>{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ projet.nom }}</div>
+    <div class="page-subtitle">{{ projet.description }}</div>
+  </div>
+  <span class="badge {{ projet.statutBadgeClass }}" style="padding:10px 20px;font-size:14px;">{{ projet.statut }}</span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-chart-pie"></i> Financement</span></div>
+    <div class="card-body">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="chart-container" style="height:200px;"><canvas id="chartFinancement"></canvas></div>
+      </div>
+      <div class="progress" style="height:12px;margin-bottom:10px;">
+        <div class="progress-bar {{ projet.pourcentageAvancement == 100 ? 'pb-green' : 'pb-blue' }}" style="width:{{ projet.pourcentageAvancement }}%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:#64748b;">Collecté : <strong style="color:#1a56db;">{{ projet.montantCollecte|number_format(0,',',' ') }} F</strong></span>
+        <span style="font-weight:700;color:{{ projet.pourcentageAvancement == 100 ? '#10b981' : '#f59e0b' }};">{{ projet.pourcentageAvancement }}%</span>
+        <span style="color:#64748b;">Budget : <strong>{{ projet.budgetTotal|number_format(0,',',' ') }} F</strong></span>
+      </div>
+      {% if projet.benefices > 0 %}
+      <div style="margin-top:14px;background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:12px;color:#64748b;">Bénéfices générés</div>
+        <div style="font-size:22px;font-weight:800;color:#16a34a;">{{ projet.benefices|number_format(0,',',' ') }} F CFA</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-info-circle"></i> Détails</span></div>
+    <div class="card-body" style="padding:0;">
+      <table style="width:100%;">
+        {% for row in [
+          ['calendar-alt','Date de début', projet.dateDebut ? projet.dateDebut|date('d/m/Y') : '—'],
+          ['calendar-check','Date de fin', projet.dateFin ? projet.dateFin|date('d/m/Y') : '—'],
+          ['coins','Budget total', projet.budgetTotal|number_format(0,',',' ') ~ ' F CFA'],
+          ['check','Montant collecté', projet.montantCollecte|number_format(0,',',' ') ~ ' F CFA'],
+          ['arrow-up','Bénéfices', projet.benefices|number_format(0,',',' ') ~ ' F CFA'],
+          ['clock','Créé le', projet.createdAt|date('d/m/Y')],
+        ] %}
+        <tr style="border-bottom:1px solid #f8fafc;">
+          <td style="padding:11px 18px;color:#64748b;font-size:13px;font-weight:500;"><i class="fas fa-{{ row[0] }}" style="width:18px;text-align:center;margin-right:6px;"></i>{{ row[1] }}</td>
+          <td style="padding:11px 18px;font-size:13.5px;font-weight:600;color:#1e293b;">{{ row[2] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+new Chart(document.getElementById('chartFinancement').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Collecté', 'Reste'],
+    datasets: [{ data: [{{ projet.montantCollecte }}, {{ max(projet.resteAFinancer, 0) }}], backgroundColor: ['#1a56db','#f1f5f9'], borderWidth: 0, hoverOffset: 4 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: true, position: 'bottom', labels: { padding: 12, font: { size: 12 }}}, tooltip: { cornerRadius: 8 }}}
+});
+</script>
+{% endblock %}

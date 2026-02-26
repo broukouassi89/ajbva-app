@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+{% block title %}Rapport Cotisations {{ annee }}{% endblock %}
+{% block breadcrumb %}
+  <span class="breadcrumb-sep">/</span>
+  <a href="{{ path('cotisation_index') }}" style="color:#64748b;">Cotisations</a>
+  <span class="breadcrumb-sep">/</span>
+  <span class="breadcrumb-current">Rapport {{ annee }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title"><i class="fas fa-chart-bar" style="color:#1a56db;"></i> Rapport annuel des cotisations</div>
+    <div class="page-subtitle">Suivi individuel de l'objectif de {{ get_setting('cotisation_annuelle', 18000)|number_format(0,',',' ') }} F CFA par membre</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <form method="GET" style="display:flex;gap:8px;align-items:center;">
+      <label style="font-size:13px;font-weight:600;color:#64748b;">Année :</label>
+      <select name="annee" class="form-control form-select" style="width:90px;" onchange="this.form.submit()">
+      {% for y in range(annee - 4, annee) %}
+        <option value="{{ y }}" {{ y == annee ? 'selected' : '' }}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+</div>
+
+{# KPIs #}
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-icon si-green"><i class="fas fa-check-circle"></i></div>
+    <div>
+      <div class="stat-value">{{ stats.complet }}</div>
+      <div class="stat-label">Objectif atteint</div>
+      <div class="stat-delta delta-up">100% payé</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-yellow"><i class="fas fa-hourglass-half"></i></div>
+    <div>
+      <div class="stat-value">{{ stats.partiel }}</div>
+      <div class="stat-label">Paiement partiel</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-red"><i class="fas fa-times-circle"></i></div>
+    <div>
+      <div class="stat-value">{{ stats.nonPaye }}</div>
+      <div class="stat-label">Non payé</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-teal"><i class="fas fa-coins"></i></div>
+    <div>
+      <div class="stat-value" style="font-size:18px;">{{ stats.total|number_format(0,',',' ') }}</div>
+      <div class="stat-label">Total collecté (F CFA)</div>
+      <div class="stat-delta">/ {{ stats.objectif|number_format(0,',',' ') }} F objectif</div>
+    </div>
+  </div>
+</div>
+
+{# Graphique global #}
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-chart-bar" style="color:#1a56db;"></i> Progression par membre</span></div>
+    <div class="card-body">
+      <div class="chart-container" style="height:280px;"><canvas id="chartRapport"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-chart-pie" style="color:#7c3aed;"></i> Répartition</span></div>
+    <div class="card-body" style="text-align:center;">
+      <div class="chart-container" style="height:200px;"><canvas id="chartRepartition"></canvas></div>
+      <div style="margin-top:16px;">
+        <div style="font-size:28px;font-weight:800;color:#1a56db;">{{ stats.objectif > 0 ? ((stats.total / stats.objectif * 100)|round) : 0 }}%</div>
+        <div style="font-size:13px;color:#64748b;">de l'objectif global atteint</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Tableau détaillé #}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title"><i class="fas fa-table"></i> Détail par membre — {{ annee }}</span>
+    <span style="font-size:13px;color:#64748b;">Objectif : <strong>{{ get_setting('cotisation_annuelle', 18000)|number_format(0,',',' ') }} F CFA / membre</strong></span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Membre</th>
+          <th>Total payé</th>
+          <th>Progression</th>
+          <th>Reste à payer</th>
+          <th>Statut</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rapport %}
+        <tr>
+          <td style="color:#94a3b8;font-size:12px;font-weight:700;">{{ loop.index }}</td>
+          <td>
+            <a href="{{ path('membre_show', {id: row.membre.id}) }}" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+              <img src="{{ row.membre.photoUrl }}" class="avatar avatar-sm" onerror="this.src='/images/avatar-default.svg'">
+              <div>
+                <div style="font-weight:700;font-size:13px;color:#1e293b;">{{ row.membre.nomComplet }}</div>
+                <div style="font-size:10.5px;color:#94a3b8;font-family:monospace;">{{ row.membre.identifiant }}</div>
+              </div>
+            </a>
+          </td>
+          <td>
+            <span style="font-weight:800;font-size:15px;color:{{ row.pourcentage >= 100 ? '#10b981' : row.pourcentage > 0 ? '#f59e0b' : '#ef4444' }};">
+              {{ row.totalPaye|number_format(0,',',' ') }} F
+            </span>
+          </td>
+          <td style="min-width:180px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="progress" style="flex:1;">
+                <div class="progress-bar {{ row.pourcentage >= 100 ? 'pb-green' : row.pourcentage >= 50 ? 'pb-blue' : 'pb-yellow' }}"
+                     style="width:{{ row.pourcentage }}%;"></div>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:#64748b;min-width:35px;">{{ row.pourcentage }}%</span>
+            </div>
+          </td>
+          <td style="font-size:13px;color:{{ row.resteAPayer > 0 ? '#ef4444' : '#10b981' }};font-weight:600;">
+            {% if row.resteAPayer > 0 %}
+              -{{ row.resteAPayer|number_format(0,',',' ') }} F
+            {% else %}
+              ✓ Complet
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge {{ row.statut == 'Complet' ? 'badge-success' : row.statut == 'Partiel' ? 'badge-warning' : 'badge-danger' }}">
+              {{ row.statut }}
+            </span>
+          </td>
+          <td>
+            {% if row.resteAPayer > 0 and is_granted('ROLE_BUREAU') %}
+            <a href="{{ path('cotisation_new') }}?membre_id={{ row.membre.id }}" class="btn btn-ghost btn-sm" style="color:#1a56db;" title="Enregistrer paiement">
+              <i class="fas fa-plus-circle"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:#94a3b8;">Aucun membre actif</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+const rapportData = [
+  {% for row in rapport %}
+  { nom: "{{ row.membre.prenom ~ ' ' ~ row.membre.nom }}", paye: {{ row.totalPaye }}, pourcentage: {{ row.pourcentage }} },
+  {% endfor %}
+];
+
+// Graphique progression (horizontal bar)
+new Chart(document.getElementById('chartRapport').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: rapportData.slice(0, 12).map(r => r.nom.length > 18 ? r.nom.substring(0,16)+'…' : r.nom),
+    datasets: [{
+      label: 'Payé (F CFA)',
+      data: rapportData.slice(0, 12).map(r => r.paye),
+      backgroundColor: rapportData.slice(0, 12).map(r =>
+        r.pourcentage >= 100 ? 'rgba(16,185,129,0.25)' : r.pourcentage > 0 ? 'rgba(26,86,219,0.2)' : 'rgba(239,68,68,0.1)'
+      ),
+      borderColor: rapportData.slice(0, 12).map(r =>
+        r.pourcentage >= 100 ? '#10b981' : r.pourcentage > 0 ? '#1a56db' : '#ef4444'
+      ),
+      borderWidth: 2, borderRadius: 6, borderSkipped: false,
+    }, {
+      label: 'Objectif (18 000 F)',
+      data: rapportData.slice(0, 12).map(() => 18000),
+      backgroundColor: 'transparent',
+      borderColor: 'rgba(100,116,139,0.3)',
+      borderWidth: 1.5, borderDash: [4, 4], type: 'line',
+      pointRadius: 0, fill: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: { cornerRadius: 8, callbacks: { label: c => `  ${new Intl.NumberFormat('fr-CI').format(c.raw)} F CFA` }}
+    },
+    scales: {
+      x: { grid: { color: '#f1f5f9' }, max: 20000, ticks: { callback: v => v.toLocaleString() + ' F', font: { size: 10 }}},
+      y: { grid: { display: false }, ticks: { font: { size: 11 }}}
+    }
+  }
+});
+
+// Graphique répartition
+new Chart(document.getElementById('chartRepartition').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Complet', 'Partiel', 'Non payé'],
+    datasets: [{
+      data: [{{ stats.complet }}, {{ stats.partiel }}, {{ stats.nonPaye }}],
+      backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+      borderWidth: 0, hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '72%',
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { padding: 10, font: { size: 11 }, boxWidth: 12 }},
+      tooltip: { cornerRadius: 8, callbacks: { label: c => `  ${c.label}: ${c.raw} membre(s)` }}
+    }
+  }
+});
+</script>
+{% endblock %}

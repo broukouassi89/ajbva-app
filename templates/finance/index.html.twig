@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finances & Comptabilité{% endblock %}
+
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current"><i class="fas fa-wallet"></i> Finances</span>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ path('finance_flux') }}" class="header-btn">
+        <i class="fas fa-exchange-alt"></i> Voir les flux
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Finances & Comptabilité</h1>
+        <p class="page-subtitle">Vue d'ensemble de la trésorerie et gestion des flux</p>
+    </div>
+    <div class="page-actions">
+        <a href="{{ path('finance_flux') }}" class="btn btn-outline">
+            <i class="fas fa-list"></i> Historique des flux
+        </a>
+        <a href="{{ path('finance_rapports') }}" class="btn btn-primary">
+            <i class="fas fa-file-invoice-dollar"></i> Rapports financiers
+        </a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon si-green">
+            <i class="fas fa-vault"></i>
+        </div>
+        <div>
+            <div class="stat-value">{{ stats.soldeCaisse|number_format(0, ',', ' ') }} F CFA</div>
+            <div class="stat-label">Solde Total Caisse</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon si-blue">
+            <i class="fas fa-arrow-trend-up"></i>
+        </div>
+        <div>
+            <div class="stat-value">{{ stats.cotisationsMoisCourant|number_format(0, ',', ' ') }} F CFA</div>
+            <div class="stat-label">Entrées du mois</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon si-purple">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <div>
+            <div class="stat-value">6</div> {# On pourrait dynamiser ça plus tard #}
+            <div class="stat-label">Projets Actifs</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon si-red">
+            <i class="fas fa-hand-holding-heart"></i>
+        </div>
+        <div>
+            <div class="stat-value">{{ stats.casSociauxEnAttente }}</div>
+            <div class="stat-label">Assistances en attente</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon si-yellow">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div>
+            <div class="stat-value text-danger">{{ stats.arrieres.totalGlobal|number_format(0, ',', ' ') }} F</div>
+            <div class="stat-label">Total Arriérés</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2-1" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history"></i> Derniers Flux Financiers</h3>
+            <a href="{{ path('finance_flux') }}" class="btn btn-sm btn-ghost">Voir tout</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Libellé</th>
+                        <th class="text-right">Montant</th>
+                        <th>Référence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in derniersFlux %}
+                    <tr>
+                        <td class="text-muted">{{ f.date|date('d/m/Y') }}</td>
+                        <td>
+                            <span class="badge {{ f.type == 'Entrée' ? 'badge-success' : 'badge-danger' }}">
+                                {{ f.type }}
+                            </span>
+                        </td>
+                        <td class="fw-600">{{ f.libelle }}</td>
+                        <td class="fw-700 {{ f.type == 'Entrée' ? 'text-success' : 'text-danger' }} text-right">
+                            {{ f.type == 'Entrée' ? '+' : '-' }} {{ f.montant|number_format(0, ',', ' ') }} F
+                        </td>
+                        <td class="font-mono text-muted">{{ f.reference }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">Aucune transaction enregistrée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-pie-chart"></i> Répartition des Entrées</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="chartTypes" style="max-height: 300px;"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-users-slash"></i> Liste des Débiteurs</h3>
+            <span class="badge badge-danger">{{ stats.arrieres.liste|length }} membres</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Membre</th>
+                        <th class="text-right">Mensuels</th>
+                        <th class="text-right">Autres</th>
+                        <th class="text-right">Total Dû</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in stats.arrieres.liste|slice(0, 10) %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('membre_show', {id: d.membre.id}) }}" class="fw-600">
+                                {{ d.membre.nomComplet }}
+                            </a>
+                            <br><small class="text-muted">{{ d.details.nbMoisRetard }} mois de retard</small>
+                        </td>
+                        <td class="text-right">{{ d.details.mensuel|number_format(0, ',', ' ') }} F</td>
+                        <td class="text-right">
+                            {% set total_autres = 0 %}
+                            {% for type, montant in d.details.autres %}
+                                {% set total_autres = total_autres + montant %}
+                            {% endfor %}
+                            {{ total_autres|number_format(0, ',', ' ') }} F
+                        </td>
+                        <td class="fw-700 text-danger text-right">{{ d.total|number_format(0, ',', ' ') }} F</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">Aucun arriéré.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new Chart(document.getElementById('chartTypes'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ stats.typesCotisations|map(t => t.type)|json_encode|raw }},
+            datasets: [{
+                data: {{ stats.typesCotisations|map(t => t.total)|json_encode|raw }},
+                backgroundColor: ['#1a56db', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#6366f1']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } },
+            cutout: '70%'
+        }
+    });
+});
+</script>
+{% endblock %}

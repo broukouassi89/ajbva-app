@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier — {{ membre.nomComplet }}{% endblock %}
+{% block breadcrumb %}
+  <span class="breadcrumb-sep">/</span>
+  <a href="{{ path('membre_index') }}" style="color:#64748b;">Membres</a>
+  <span class="breadcrumb-sep">/</span>
+  <a href="{{ path('membre_show', {id: membre.id}) }}" style="color:#64748b;">{{ membre.nomComplet }}</a>
+  <span class="breadcrumb-sep">/</span>
+  <span class="breadcrumb-current">Modifier</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Modifier le membre</div>
+    <div class="page-subtitle">{{ membre.identifiant }} · {{ membre.nomComplet }}</div>
+  </div>
+  <a href="{{ path('membre_show', {id: membre.id}) }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour à la fiche</a>
+</div>
+
+{{ form_start(form, {attr: {enctype: 'multipart/form-data', novalidate: 'novalidate'}}) }}
+
+<div style="display:grid; grid-template-columns:1fr 300px; gap:20px; align-items:start;">
+  <div style="display:flex; flex-direction:column; gap:18px;">
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-user"></i> Informations personnelles</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">{{ form_label(form.nom) }}{{ form_widget(form.nom) }}{{ form_errors(form.nom) }}</div>
+          <div class="form-group">{{ form_label(form.prenom) }}{{ form_widget(form.prenom) }}{{ form_errors(form.prenom) }}</div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">{{ form_label(form.genre) }}{{ form_widget(form.genre) }}{{ form_errors(form.genre) }}</div>
+          <div class="form-group">
+            {{ form_label(form.dateNaissance) }}{{ form_widget(form.dateNaissance) }}
+            <div id="age-display" class="form-hint" style="color:#1a56db; font-weight:600;">→ Âge actuel : {{ membre.age }} ans</div>
+            {{ form_errors(form.dateNaissance) }}
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">{{ form_label(form.telephone) }}{{ form_widget(form.telephone) }}{{ form_errors(form.telephone) }}</div>
+          <div class="form-group">{{ form_label(form.email) }}{{ form_widget(form.email) }}{{ form_errors(form.email) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-id-card"></i> Informations statutaires</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">{{ form_label(form.grandeFamille) }}{{ form_widget(form.grandeFamille) }}</div>
+          <div class="form-group">{{ form_label(form.villageOrigine) }}{{ form_widget(form.villageOrigine) }}</div>
+        </div>
+        <div class="form-group" style="max-width:280px;">
+          {{ form_label(form.dateAdhesion) }}
+          {{ form_widget(form.dateAdhesion, {attr: {readonly: 'readonly', style: 'background:#f8fafc; cursor:not-allowed;'}}) }}
+          <div class="form-hint">Date immuable · Ancienneté : <strong style="color:#10b981;">{{ membre.anciennete }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn btn-primary" style="flex:1; justify-content:center;"><i class="fas fa-save"></i> Enregistrer les modifications</button>
+      <a href="{{ path('membre_show', {id: membre.id}) }}" class="btn btn-outline">Annuler</a>
+    </div>
+  </div>
+
+  {# Panneau latéral #}
+  <div style="display:flex; flex-direction:column; gap:16px; position:sticky; top:80px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-camera"></i> Photo</span></div>
+      <div class="card-body" style="text-align:center;">
+        <div style="position:relative; display:inline-block; margin-bottom:14px;">
+          <img class="photo-preview" src="{{ membre.photoUrl }}" alt="{{ membre.nomComplet }}"
+               style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;box-shadow:0 4px 14px rgba(0,0,0,.1);" onerror="this.src='/images/avatar-default.svg'">
+          <label for="{{ form.photoFile.vars.id }}" style="position:absolute;bottom:4px;right:4px;width:30px;height:30px;background:#1a56db;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <i class="fas fa-camera" style="color:white;font-size:12px;"></i>
+          </label>
+        </div>
+        {{ form_widget(form.photoFile, {attr: {style:'display:none', onchange:'previewPhoto(this)'}}) }}
+        <div class="form-hint">Laisser vide pour conserver la photo actuelle</div>
+      </div>
+    </div>
+
+    <div style="background:#f8fafc;border-radius:12px;padding:16px;text-align:center;">
+      <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Identifiant</div>
+      <div style="font-size:18px;font-weight:800;color:#1a56db;font-family:monospace;">{{ membre.identifiant }}</div>
+      <div style="margin-top:10px;"><span class="badge {{ membre.statutBadgeClass }}">{{ membre.statut }}</span></div>
+    </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;">
+      <div style="font-size:12px;color:#991b1b;font-weight:700;margin-bottom:10px;">⚠️ Zone dangereuse</div>
+      <form method="POST" action="{{ path('membre_delete', {id: membre.id}) }}"
+            onsubmit="return confirm('Supprimer définitivement {{ membre.nomComplet }} ? Cette action est irréversible.')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_membre_' ~ membre.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm" style="width:100%;justify-content:center;">
+          <i class="fas fa-trash-alt"></i> Supprimer ce membre
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{{ form_end(form) }}
+{% endblock %}

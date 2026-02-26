@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rapports Financiers{% endblock %}
+
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <a href="{{ path('finance_index') }}">Finances</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Rapports</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Rapports Financiers</h1>
+        <p class="page-subtitle">Rapport annuel et état de la caisse pour l'exercice {{ annee }}</p>
+    </div>
+    <div class="page-actions">
+        <form class="d-flex gap-8" method="GET">
+            <select name="annee" class="form-control" onchange="this.form.submit()">
+                {% for y in (date()|date('Y'))..2020 %}
+                    <option value="{{ y }}" {{ y == annee ? 'selected' : '' }}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Exporter en PDF
+        </button>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon si-green">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div>
+            <div class="stat-value">{{ stats.soldeCaisse|number_format(0, ',', ' ') }} F CFA</div>
+            <div class="stat-label">Disponibilité Caisse</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon si-blue">
+            <i class="fas fa-hand-holding-dollar"></i>
+        </div>
+        <div>
+            <div class="stat-value">
+                {% set total_cotis = 0 %}
+                {% for r in rapportAnnuel %}{% set total_cotis = total_cotis + r.totalPaye %}{% endfor %}
+                {{ total_cotis|number_format(0, ',', ' ') }} F
+            </div>
+            <div class="stat-label">Total Cotisations {{ annee }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-24">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-project-diagram"></i> Solde par Projet</h3>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Projet</th>
+                    <th>Budget Total</th>
+                    <th>Montant Collecté</th>
+                    <th>Reste à Financer</th>
+                    <th>Bénéfices</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in stats.projets %}
+                <tr>
+                    <td class="fw-600">{{ p.nom }}</td>
+                    <td>{{ p.budgetTotal|number_format(0, ',', ' ') }} F</td>
+                    <td class="text-success">{{ p.montantCollecte|number_format(0, ',', ' ') }} F</td>
+                    <td class="text-danger">{{ p.resteAFinancer|number_format(0, ',', ' ') }} F</td>
+                    <td class="fw-700">{{ p.benefices|number_format(0, ',', ' ') }} F</td>
+                    <td>
+                        <span class="badge {{ p.statutBadgeClass }}">
+                            {{ p.statut }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">Aucun projet enregistré.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card mb-24">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-book"></i> Grand Livre des Membres ({{ annee }})</h3>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Membre</th>
+                    <th>Identifiant</th>
+                    <th>Total Payé</th>
+                    <th>Reste à Payer</th>
+                    <th>Progression</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rapportAnnuel %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-center gap-12">
+                            <div class="user-avatar" style="width: 30px; height: 30px; font-size: 11px;">
+                                {{ r.membre.nom|slice(0, 1) }}{{ r.membre.prenom|slice(0, 1) }}
+                            </div>
+                            <span class="fw-600">{{ r.membre.nomComplet }}</span>
+                        </div>
+                    </td>
+                    <td class="font-mono text-muted">{{ r.membre.identifiant }}</td>
+                    <td class="fw-700">{{ r.totalPaye|number_format(0, ',', ' ') }} F</td>
+                    <td class="text-danger">{{ r.resteAPayer|number_format(0, ',', ' ') }} F</td>
+                    <td style="width: 200px;">
+                        <div class="d-flex align-center gap-8">
+                            <div class="progress flex-1">
+                                <div class="progress-bar {{ r.pourcentage == 100 ? 'pb-green' : (r.pourcentage > 50 ? 'pb-blue' : 'pb-yellow') }}" 
+                                     style="width: {{ r.pourcentage }}%"></div>
+                            </div>
+                            <small class="fw-700">{{ r.pourcentage }}%</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge {{ r.statut == 'Complet' ? 'badge-success' : (r.statut == 'Partiel' ? 'badge-info' : 'badge-danger') }}">
+                            {{ r.statut }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-chart-line"></i> Évolution mensuelle des cotisations ({{ annee }})</h3>
+    </div>
+    <div class="card-body">
+        <canvas id="chartEvolution" style="max-height: 350px;"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new Chart(document.getElementById('chartEvolution'), {
+        type: 'line',
+        data: {
+            labels: {{ stats.evolution.labels|json_encode|raw }},
+            datasets: [{
+                label: 'Cotisations (F CFA)',
+                data: {{ stats.evolution.data|json_encode|raw }},
+                borderColor: '#1a56db',
+                backgroundColor: 'rgba(26, 86, 219, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+@media print {
+    .sidebar, .app-header, .page-actions, .btn-ghost { display: none !important; }
+    .app-main { margin-left: 0 !important; padding-top: 0 !important; }
+    .content-wrapper { padding: 0 !important; }
+    .card { border: 1px solid #eee !important; box-shadow: none !important; margin-bottom: 20px !important; }
+    .stats-grid { grid-template-columns: 1fr 1fr !important; }
+}
+</style>
+{% endblock %}

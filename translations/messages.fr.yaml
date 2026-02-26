@@ -1,0 +1,90 @@
+app:
+    title: 'AJBVA'
+    description: 'Association des Jeunes de Botro et Villages Avoisinants'
+
+# Messages flash
+flash:
+    success:
+        membre_created: 'Membre créé avec succès !'
+        membre_updated: 'Fiche membre mise à jour.'
+        membre_deleted: 'Membre supprimé.'
+        statut_changed: 'Statut modifié avec succès.'
+        cotisation_saved: 'Paiement enregistré avec succès.'
+        cas_social_declared: 'Cas social déclaré avec succès.'
+        assistance_updated: "Statut de l'assistance mis à jour."
+    error:
+        not_found: 'Ressource introuvable.'
+        access_denied: 'Accès refusé.'
+        form_invalid: 'Le formulaire contient des erreurs.'
+
+# Validation
+validation:
+    membre:
+        nom:
+            not_blank: 'Le nom est obligatoire.'
+            length: 'Le nom doit contenir entre 2 et 100 caractères.'
+        prenom:
+            not_blank: 'Le prénom est obligatoire.'
+        telephone:
+            not_blank: 'Le numéro de téléphone est obligatoire.'
+        email:
+            invalid: "L'adresse email n'est pas valide."
+        date_naissance:
+            not_blank: 'La date de naissance est obligatoire.'
+        date_adhesion:
+            not_blank: "La date d'adhésion est obligatoire."
+
+# Statuts
+statut:
+    actif: 'Actif'
+    inactif: 'Inactif'
+    ancien_membre: 'Ancien Membre'
+
+# Types cotisation
+cotisation:
+    type:
+        mensuelle: 'Cotisation Mensuelle'
+        exceptionnelle: 'Cotisation Exceptionnelle'
+        sociale: 'Cotisation Sociale'
+        adhesion: "Carte d'Adhésion"
+    statut:
+        payee: 'Payée'
+        partielle: 'Partielle'
+        en_attente: 'En attente'
+
+# Cas sociaux
+cas_social:
+    type:
+        deces_membre: 'Décès membre'
+        deces_conjoint: 'Décès conjoint(e)'
+        deces_enfant: 'Décès enfant'
+        deces_pere_mere: 'Décès père/mère'
+        mariage: 'Mariage'
+        naissance: 'Naissance'
+    statut:
+        en_attente: 'En attente'
+        validee: 'Validée'
+        payee: 'Payée'
+        refusee: 'Refusée'
+
+# Navigation
+nav:
+    dashboard: 'Tableau de bord'
+    membres: 'Membres'
+    cotisations: 'Cotisations'
+    affaires_sociales: 'Affaires Sociales'
+    projets: 'Projets'
+    patrimoine: 'Patrimoine'
+    rapport: 'Rapport annuel'
+    logout: 'Déconnexion'
+
+# Sécurité
+security:
+    login:
+        title: 'Connexion'
+        email_label: 'Adresse email'
+        password_label: 'Mot de passe'
+        submit: 'Se connecter'
+        error: 'Identifiants invalides.'
+    invalid_csrf_token: 'Jeton de sécurité invalide. Veuillez réessayer.'
+    bad_credentials: 'Email ou mot de passe incorrect.'

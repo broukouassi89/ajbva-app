@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+{% block title %}Déclarer un cas social{% endblock %}
+{% block breadcrumb %}<span class="breadcrumb-sep">/</span><a href="{{ path('cas_social_index') }}" style="color:#64748b;">Affaires Sociales</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-current">Nouvelle déclaration</span>{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">Déclarer un cas social</div><div class="page-subtitle">Enregistrement d'un événement ouvrant droit à assistance</div></div>
+  <a href="{{ path('cas_social_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour</a>
+</div>
+
+<div style="max-width:680px;">
+  {{ form_start(form) }}
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title"><i class="fas fa-user"></i> Membre concerné</span></div>
+      <div class="card-body">
+        <div class="form-group" style="margin:0;">
+          {{ form_label(form.membre, null, {'label_attr': {'class': 'form-label'}}) }}
+          {{ form_widget(form.membre, {'attr': {'class': 'form-control form-select'}}) }}
+          {{ form_errors(form.membre) }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><i class="fas fa-info-circle"></i> Détails de l'événement</span></div>
+      <div class="card-body">
+        <div class="form-grid-2">
+          <div class="form-group">
+            {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-control form-select', 'id': 'typeSelect', 'onchange': 'onTypeChange(this.value)'}}) }}
+            {{ form_errors(form.type) }}
+          </div>
+          <div class="form-group">
+            {{ form_label(form.dateEvenement, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.dateEvenement, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateEvenement) }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+          {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Détails complémentaires...'}}) }}
+          {{ form_errors(form.description) }}
+        </div>
+
+        <div id="infoAssistance" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <i class="fas fa-calculator" style="color:#0ea5e9;font-size:18px;"></i>
+          <span style="font-size:13px;color:#0369a1;">
+            Montant estimé de l'assistance : <strong id="montantAffiche">—</strong> F CFA.
+            <br><small>Le montant exact sera calculé lors de l'enregistrement.</small>
+          </span>
+        </div>
+
+        <div style="background:#fff7ed;border:1px solid #ffedd5;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <i class="fas fa-exclamation-triangle" style="color:#f97316;font-size:18px;"></i>
+          <span style="font-size:13px;color:#9a3412;">L'enregistrement générera automatiquement des <strong>cotisations sociales</strong> pour tous les autres membres actifs.</span>
+        </div>
+
+        <hr>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;"><i class="fas fa-save"></i> Déclarer l'événement</button>
+          <a href="{{ path('cas_social_index') }}" class="btn btn-outline btn-lg">Annuler</a>
+        </div>
+      </div>
+    </div>
+  {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+const montants = {{ get_setting('assistance_deces_membre', 300000)|json_encode|raw }}; // Just an example, ideally pass all
+const configMontants = {
+    'Décès membre': {{ get_setting('assistance_deces_membre', 300000) }},
+    'Décès conjoint(e)': {{ get_setting('assistance_deces_conjoint', 75000) }},
+    'Décès enfant': {{ get_setting('assistance_deces_enfant', 50000) }},
+    'Décès père/mère': '50 000 par enfant',
+    'Mariage': {{ get_setting('assistance_mariage', 50000) }},
+    'Naissance': {{ get_setting('assistance_naissance', 35000) }}
+};
+
+function onTypeChange(type) {
+    const display = document.getElementById('montantAffiche');
+    display.innerText = configMontants[type] || '—';
+}
+
+document.addEventListener('DOMContentLoaded', () => onTypeChange(document.getElementById('typeSelect').value));
+</script>
+{% endblock %}

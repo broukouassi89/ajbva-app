@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+{% block title %}Annonces Officielles{% endblock %}
+{% block breadcrumb %}
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Annonces</span>
+{% endblock %}
+{% block header_actions %}
+    {% if is_granted('ROLE_BUREAU') %}
+    <a href="{{ path('annonce_new') }}" class="header-btn primary"><i class="fas fa-plus"></i> Publier</a>
+    {% endif %}
+{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Annonces Officielles</h1>
+        <p class="page-subtitle">Informations et communications du Bureau AJBVA</p>
+    </div>
+</div>
+<div style="display: grid; gap: 20px;">
+    {% for a in annonces %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ a.titre }}</h3>
+            <span class="text-muted" style="font-size: 12px;">{{ a.createdAt|date('d/m/Y H:i') }}</span>
+        </div>
+        <div class="card-body">
+            <p>{{ a.contenu|nl2br }}</p>
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee; font-size: 12px; color: #64748b;">
+                Publié par : <strong>{{ a.auteur.displayName }}</strong>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Aucune annonce publiée pour le moment.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

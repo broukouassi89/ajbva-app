@@ -1,0 +1,4 @@
+nom;prenom;genre;date_naissance;date_adhesion;telephone;email;grande_famille;village_origine;statut
+KOUASSI;Jean-Baptiste;Masculin;1990-03-15;2020-01-10;+225 07 12 34 56 78;jean.kouassi@email.com;Famille Kouassi;Botro;Actif
+KONAN;Marie-Claire;Féminin;1995-07-22;2021-03-15;+225 05 98 76 54 32;marie.konan@email.com;Famille Konan;Botro;Actif
+KOFFI;Pierre-Emmanuel;Masculin;1988-11-05;2019-06-01;+225 01 23 45 67 89;;Famille Koffi;Village Avoisinant 1;Actif
