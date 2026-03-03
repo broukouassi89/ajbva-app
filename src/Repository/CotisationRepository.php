@@ -156,4 +156,38 @@ class CotisationRepository extends ServiceEntityRepository
             ->groupBy('c.membre')
             ->getQuery()->getArrayResult();
     }
+
+    public function findByYear(int $annee): array
+    {
+        $start = new \DateTimeImmutable(sprintf('%d-01-01 00:00:00', $annee));
+        $end   = $start->modify('+1 year');
+
+        return $this->createQueryBuilder('c')
+            ->where('c.datePaiement >= :start')
+            ->andWhere('c.datePaiement < :end')
+            ->andWhere('c.statut = :statut')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('statut', Cotisation::STATUT_PAYEE)
+            ->orderBy('c.datePaiement', 'ASC')
+            ->getQuery()->getResult();
+    }
+
+    public function findByTypeAndYear(string $type, int $annee): array
+    {
+        $start = new \DateTimeImmutable(sprintf('%d-01-01 00:00:00', $annee));
+        $end   = $start->modify('+1 year');
+
+        return $this->createQueryBuilder('c')
+            ->where('c.type = :type')
+            ->andWhere('c.datePaiement >= :start')
+            ->andWhere('c.datePaiement < :end')
+            ->andWhere('c.statut = :statut')
+            ->setParameter('type', $type)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('statut', Cotisation::STATUT_PAYEE)
+            ->orderBy('c.datePaiement', 'ASC')
+            ->getQuery()->getResult();
+    }
 }

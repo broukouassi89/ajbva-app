@@ -1,5 +1,23 @@
 {% extends 'base.html.twig' %}
 {% block title %}Calendrier & PV{% endblock %}
+
+{% block javascripts %}
+<script>
+    function showPVModal(titre, contenu) {
+        const modal = document.getElementById('important-modal');
+        const body = modal.querySelector('.modal-body');
+        const icon = modal.querySelector('.modal-icon');
+        const title = modal.querySelector('.modal-title');
+
+        title.innerText = "PV : " + titre;
+        body.innerHTML = '<div class="pv-content">' + contenu + '</div>'; // Rendu du HTML enrichi
+        icon.innerHTML = '<i class="fas fa-file-signature"></i>';
+        icon.className = 'modal-icon modal-icon-success';
+
+        modal.classList.add('show');
+    }
+</script>
+{% endblock %}
 {% block breadcrumb %}
     <span class="breadcrumb-sep">/</span>
     <span class="breadcrumb-current">Calendrier</span>
@@ -38,20 +56,25 @@
                     </td>
                     <td>{{ e.lieu ?? '—' }}</td>
                     <td><span class="badge badge-info">{{ e.type }}</span></td>
-                    <td>
-                        {% if e.procesVerbal %}
-                            <button class="btn btn-sm btn-outline" onclick="alert('{{ e.procesVerbal.contenu|escape('js') }}')">
-                                <i class="fas fa-file-alt"></i> Voir PV
-                            </button>
-                        {% else %}
-                            {% if is_granted('ROLE_BUREAU') %}
-                            <a href="{{ path('admin_pv_new', {id: e.id}) }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-pen"></i> Rédiger PV
+                    <td style="white-space:nowrap;">
+                        <div style="display:flex;gap:8px;">
+                            <a href="{{ path('admin_evenement_photos', {id: e.id}) }}" class="btn btn-sm btn-ghost" title="Photos">
+                                <i class="fas fa-camera"></i> ({{ e.photos|length }})
                             </a>
+                            {% if e.procesVerbal %}
+                                <button class="btn btn-sm btn-outline" onclick="showPVModal('{{ e.titre|escape('js') }}', '{{ e.procesVerbal.contenu|escape('js') }}')">
+                                    <i class="fas fa-file-alt"></i> Voir PV
+                                </button>
                             {% else %}
-                            <span class="text-muted italic">Non disponible</span>
+                                {% if is_granted('ROLE_BUREAU') %}
+                                <a href="{{ path('admin_pv_new', {id: e.id}) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-pen"></i> Rédiger PV
+                                </a>
+                                {% else %}
+                                <span class="text-muted italic">Non disponible</span>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% else %}

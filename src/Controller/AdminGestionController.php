@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Evenement;
+use App\Entity\EventPhoto;
 use App\Entity\ProcesVerbal;
 use App\Form\EvenementType;
 use App\Form\ProcesVerbalType;
@@ -11,15 +12,22 @@ use App\Repository\ProcesVerbalRepository;
 use App\Service\AuditService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/gestion')]
 #[IsGranted('ROLE_BUREAU')]
 class AdminGestionController extends AbstractController
 {
+    public function __construct(
+        private readonly string $uploadDir
+    ) {}
+
     #[Route('/evenements', name: 'admin_evenement_index', methods: ['GET'])]
     public function indexEvenements(EvenementRepository $repo): Response
     {
@@ -47,6 +55,43 @@ class AdminGestionController extends AbstractController
 
         return $this->render('admin_gestion/evenement_new.html.twig', [
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/evenements/{id}/photos', name: 'admin_evenement_photos', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_BUREAU')]
+    public function uploadPhotos(Evenement $evenement, Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    {
+        if ($request->isMethod('POST')) {
+            /** @var UploadedFile[] $files */
+            $files = $request->files->get('photos');
+
+            if ($files) {
+                foreach ($files as $file) {
+                    $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+
+                    try {
+                        $file->move($this->uploadDir . '/events', $newFilename);
+                        
+                        $photo = new EventPhoto();
+                        $photo->setFilename($newFilename)
+                              ->setEvenement($evenement);
+
+                        $em->persist($photo);
+                    } catch (FileException $e) {
+                        continue;
+                    }
+                }
+                $em->flush();
+                $this->addFlash('success', 'Photos ajoutées à l\'événement.');
+            }
+            return $this->redirectToRoute('admin_evenement_photos', ['id' => $evenement->getId()]);
+        }
+
+        return $this->render('admin_gestion/evenement_photos.html.twig', [
+            'evenement' => $evenement,
         ]);
     }
 

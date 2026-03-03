@@ -10,7 +10,7 @@
         {{ form_start(form) }}
             <div class="form-group">
                 {{ form_label(form.contenu, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.contenu, {'attr': {'class': 'form-control'}}) }}
+                {{ form_widget(form.contenu) }}
                 {{ form_errors(form.contenu) }}
             </div>
             <div class="mt-16">

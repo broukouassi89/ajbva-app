@@ -7,6 +7,7 @@ use App\Form\CotisationType;
 use App\Repository\CotisationRepository;
 use App\Repository\MembreRepository;
 use App\Service\FinanceService;
+use App\Service\PdfService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -117,6 +118,31 @@ class CotisationController extends AbstractController
             'annee'   => $annee,
             'stats'   => $stats,
         ]);
+    }
+
+    #[Route('/rapport/pdf', name: 'cotisation_rapport_pdf', methods: ['GET'])]
+    #[IsGranted('ROLE_BUREAU')]
+    public function exportPdf(
+        Request $request,
+        FinanceService $financeService,
+        PdfService $pdfService,
+    ): Response {
+        $annee = $request->query->getInt('annee', (int) date('Y'));
+        $rapport = $financeService->getRapportAnnuel($annee);
+
+        $html = $this->renderView('cotisation/rapport_pdf.html.twig', [
+            'rapport' => $rapport,
+            'annee'   => $annee,
+        ]);
+
+        return new Response(
+            $pdfService->getOutput($html),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => sprintf('attachment; filename="Rapport_Cotisations_%d.pdf"', $annee),
+            ]
+        );
     }
 
     #[Route('/{id}', name: 'cotisation_show', methods: ['GET'])]

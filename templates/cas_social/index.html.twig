@@ -52,12 +52,12 @@
       <thead>
         <tr>
           <th>Type</th>
-          <th>Membre concerné</th>
-          <th>Date événement</th>
+          <th>Membre</th>
+          <th class="hide-mobile">Date</th>
           <th>Assistance</th>
-          <th>Cotisations sociales</th>
+          <th class="hide-tablet">Cotisations sociales</th>
           <th>Statut</th>
-          <th>Actions</th>
+          <th style="text-align:right;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -66,7 +66,7 @@
           <td>
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:22px;">{{ cas.typeIcon }}</span>
-              <span style="font-weight:600;font-size:13px;">{{ cas.type }}</span>
+              <span class="hide-mobile" style="font-weight:600;font-size:13px;">{{ cas.type }}</span>
             </div>
           </td>
           <td>
@@ -74,17 +74,17 @@
               <img src="{{ cas.membre.photoUrl }}" class="avatar avatar-sm" onerror="this.src='/images/avatar-default.svg'">
               <div>
                 <div style="font-weight:600;font-size:13px;color:#1e293b;">{{ cas.membre.nomComplet }}</div>
-                <div style="font-size:10.5px;color:#94a3b8;font-family:monospace;">{{ cas.membre.identifiant }}</div>
+                <div class="hide-mobile" style="font-size:10.5px;color:#94a3b8;font-family:monospace;">{{ cas.membre.identifiant }}</div>
               </div>
             </a>
           </td>
-          <td style="color:#64748b;">{{ cas.dateEvenement|date('d/m/Y') }}</td>
+          <td class="hide-mobile" style="color:#64748b;">{{ cas.dateEvenement|date('d/m/Y') }}</td>
           <td>
             <span style="font-weight:800;color:#1a56db;font-size:15px;">
               {{ cas.montantAssistanceFormate }}
             </span>
           </td>
-          <td>
+          <td class="hide-tablet">
             <div style="font-size:12px;">
               <span style="font-weight:700;color:#10b981;">{{ cas.nbCotisationsSocialesPayees }}</span>
               <span style="color:#94a3b8;"> / {{ cas.cotisationsSociales|length }} payées</span>
@@ -99,8 +99,8 @@
             {% endif %}
           </td>
           <td><span class="badge {{ cas.statutBadgeClass }}">{{ cas.statutAssistance }}</span></td>
-          <td>
-            <div style="display:flex;gap:4px;">
+          <td style="text-align:right;">
+            <div style="display:flex;gap:4px;justify-content:flex-end;">
               <a href="{{ path('cas_social_show', {id: cas.id}) }}" class="btn btn-ghost btn-sm" title="Détails">
                 <i class="fas fa-eye"></i>
               </a>

@@ -83,6 +83,12 @@ class Membre
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $villageOrigine = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $profession = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $secteurActivite = null;
+
     #[ORM\Column(length: 20)]
     private string $statut = self::STATUT_ACTIF;
 
@@ -206,6 +212,12 @@ class Membre
 
     public function getGrandeFamille(): ?string { return $this->grandeFamille; }
     public function setGrandeFamille(?string $grandeFamille): static { $this->grandeFamille = $grandeFamille; return $this; }
+
+    public function getProfession(): ?string { return $this->profession; }
+    public function setProfession(?string $profession): static { $this->profession = $profession; return $this; }
+
+    public function getSecteurActivite(): ?string { return $this->secteurActivite; }
+    public function setSecteurActivite(?string $secteurActivite): static { $this->secteurActivite = $secteurActivite; return $this; }
 
     public function getVillageOrigine(): ?string { return $this->villageOrigine; }
     public function setVillageOrigine(?string $villageOrigine): static { $this->villageOrigine = $villageOrigine; return $this; }

@@ -47,4 +47,20 @@ class CasSocialRepository extends ServiceEntityRepository
             ->groupBy('c.type')
             ->getQuery()->getArrayResult();
     }
+
+    public function findByYear(int $annee): array
+    {
+        $start = new \DateTimeImmutable(sprintf('%d-01-01 00:00:00', $annee));
+        $end   = $start->modify('+1 year');
+
+        return $this->createQueryBuilder('cs')
+            ->where('cs.dateEvenement >= :start')
+            ->andWhere('cs.dateEvenement < :end')
+            ->andWhere('cs.statutAssistance = :statut')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('statut', 'Payée')
+            ->orderBy('cs.dateEvenement', 'ASC')
+            ->getQuery()->getResult();
+    }
 }

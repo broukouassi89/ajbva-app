@@ -335,4 +335,52 @@ class FinanceService
         $this->em->flush();
         return $count;
     }
+
+    /**
+     * Statistiques mensuelles (Recettes vs Dépenses) pour une année
+     */
+    public function getStatsFinancieresMensuelles(int $annee): array
+    {
+        $stats = array_fill(1, 12, ['recettes' => 0.0, 'depenses' => 0.0]);
+
+        // Recettes : Cotisations mensuelles, exceptionnelles, adhésions
+        $cotisations = $this->cotisationRepo->findByYear($annee);
+        foreach ($cotisations as $c) {
+            $mois = (int) $c->getDatePaiement()->format('m');
+            $stats[$mois]['recettes'] += (float) $c->getMontant();
+        }
+
+        // Dépenses : Assistances sociales versées
+        $casSociaux = $this->casSocialRepo->findByYear($annee);
+        foreach ($casSociaux as $cas) {
+            $mois = (int) $cas->getDateEvenement()->format('m');
+            $stats[$mois]['depenses'] += (float) $cas->getMontantAssistance();
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Évolution du fonds social (Cotisations sociales vs Assistances versées)
+     */
+    public function getEvolutionFondsSocial(int $annee): array
+    {
+        $stats = array_fill(1, 12, ['fonds' => 0.0, 'versé' => 0.0]);
+
+        // Entrées : Cotisations sociales
+        $cotisations = $this->cotisationRepo->findByTypeAndYear(Cotisation::TYPE_SOCIALE, $annee);
+        foreach ($cotisations as $c) {
+            $mois = (int) $c->getDatePaiement()->format('m');
+            $stats[$mois]['fonds'] += (float) $c->getMontant();
+        }
+
+        // Sorties : Assistances versées
+        $casSociaux = $this->casSocialRepo->findByYear($annee);
+        foreach ($casSociaux as $cas) {
+            $mois = (int) $cas->getDateEvenement()->format('m');
+            $stats[$mois]['versé'] += (float) $cas->getMontantAssistance();
+        }
+
+        return $stats;
+    }
 }

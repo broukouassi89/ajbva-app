@@ -102,7 +102,7 @@
 </div>
 
 {# ─── GRAPHIQUES ROW 2 ─── #}
-<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px;">
 
   {# Répartition par village (Bar horizontal) #}
   <div class="card">
@@ -142,7 +142,7 @@
 </div>
 
 {# ─── DERNIERS MEMBRES & TRANSACTIONS ─── #}
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
 
   {# Derniers membres #}
   <div class="card">
@@ -156,11 +156,11 @@
         <img src="{{ membre.photoUrl }}" alt="" class="avatar avatar-sm" onerror="this.src='/images/avatar-default.svg'">
         <div style="flex:1; min-width:0;">
           <div style="font-weight:700; font-size:13.5px; color:#1e293b;">{{ membre.nomComplet }}</div>
-          <div style="font-size:11px; color:#94a3b8; font-family:monospace;">{{ membre.identifiant }}</div>
+          <div class="hide-mobile" style="font-size:11px; color:#94a3b8; font-family:monospace;">{{ membre.identifiant }}</div>
         </div>
         <div style="text-align:right;">
           <span class="badge {{ membre.statutBadgeClass }}">{{ membre.statut }}</span>
-          <div style="font-size:11px; color:#94a3b8; margin-top:2px;">{{ membre.dateAdhesion|date('d/m/Y') }}</div>
+          <div class="hide-mobile" style="font-size:11px; color:#94a3b8; margin-top:2px;">{{ membre.dateAdhesion|date('d/m/Y') }}</div>
         </div>
       </a>
       {% endfor %}
@@ -186,7 +186,7 @@
         </div>
         <div style="text-align:right; flex-shrink:0;">
           <div style="font-weight:800; color:#10b981; font-size:14px;">+{{ tx.montant|number_format(0, ',', ' ') }} F</div>
-          <div style="font-size:11px; color:#94a3b8;">{{ tx.datePaiement|date('d/m/Y') }}</div>
+          <div class="hide-mobile" style="font-size:11px; color:#94a3b8;">{{ tx.datePaiement|date('d/m/Y') }}</div>
         </div>
       </div>
       {% else %}

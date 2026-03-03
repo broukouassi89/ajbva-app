@@ -17,6 +17,7 @@ class ProcesVerbalType extends AbstractType
                 'label' => 'Contenu du compte-rendu',
                 'attr' => [
                     'rows' => 15,
+                    'class' => 'form-control ck-editor-rich',
                     'placeholder' => 'Saisissez ici les points abordés et les décisions prises...'
                 ],
             ])

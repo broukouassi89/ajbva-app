@@ -13,15 +13,20 @@ use Doctrine\ORM\EntityManagerInterface;
 class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'security_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
+            // ... (logique existante)
             /** @var \App\Entity\User $user */
             $user = $this->getUser();
             if ($user->isMustChangePassword()) {
                 return $this->redirectToRoute('security_change_password');
             }
             return $this->redirectToRoute('dashboard');
+        }
+
+        if ($request->query->get('reason') === 'inactivity') {
+            $this->addFlash('warning', '🔒 Votre session a expiré après 15 minutes d\'inactivité. Veuillez vous reconnecter.');
         }
 
         return $this->render('security/login.html.twig', [
@@ -58,7 +63,7 @@ class SecurityController extends AbstractController
         return $this->render('security/change_password.html.twig');
     }
 
-    #[Route('/logout', name: 'security_logout', methods: ['POST'])]
+    #[Route('/logout', name: 'security_logout', methods: ['GET', 'POST'])]
     public function logout(): void
     {
         // Géré par Symfony Security

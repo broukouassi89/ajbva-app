@@ -42,9 +42,13 @@ class Evenement
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\OneToMany(targetEntity: EventPhoto::class, mappedBy: 'evenement', cascade: ['persist', 'remove'])]
+    private Collection $photos;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->photos = new ArrayCollection();
         $this->dateDebut = new \DateTime();
     }
 
@@ -64,4 +68,12 @@ class Evenement
     public function getProcesVerbal(): ?ProcesVerbal { return $this->procesVerbal; }
     public function setProcesVerbal(?ProcesVerbal $pv): static { $this->procesVerbal = $pv; return $this; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+
+    /**
+     * @return Collection<int, EventPhoto>
+     */
+    public function getPhotos(): Collection
+    {
+        return $this->photos;
+    }
 }

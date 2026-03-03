@@ -65,6 +65,29 @@ class MembreType extends AbstractType
                 'choices'     => array_combine(Membre::VILLAGES, Membre::VILLAGES),
                 'attr'        => ['class' => 'form-control form-select'],
             ])
+            ->add('profession', TextType::class, [
+                'label'    => 'Profession',
+                'required' => false,
+                'attr'     => ['placeholder' => 'Ex: Informaticien, Commerçant...', 'class' => 'form-control'],
+            ])
+            ->add('secteurActivite', ChoiceType::class, [
+                'label'       => 'Secteur d\'activité',
+                'required'    => false,
+                'placeholder' => 'Sélectionner un secteur',
+                'choices'     => [
+                    'Agriculture & Élevage' => 'Agriculture',
+                    'Commerce & Vente' => 'Commerce',
+                    'Éducation & Formation' => 'Éducation',
+                    'Santé & Social' => 'Santé',
+                    'Informatique & Digital' => 'Informatique',
+                    'Artisanat & BTP' => 'Artisanat',
+                    'Administration & Services' => 'Administration',
+                    'Transport & Logistique' => 'Transport',
+                    'Étudiant' => 'Étudiant',
+                    'Autre' => 'Autre',
+                ],
+                'attr' => ['class' => 'form-control form-select'],
+            ])
             ->add('photoFile', FileType::class, [
                 'label'       => 'Photo',
                 'mapped'      => false,
