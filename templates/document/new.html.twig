@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ajouter un document{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title"><i class="fas fa-file-upload" style="color:#1a56db;"></i> Ajouter un document</div>
+    <div class="page-subtitle">Rendez les documents officiels accessibles aux membres</div>
+  </div>
+  <a href="{{ path('document_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Retour</a>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;">
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-upload"></i> Upload de fichier</span></div>
+    <div class="card-body">
+      <form action="{{ path('document_new') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label">Titre du document <span class="form-required">*</span></label>
+          <input type="text" name="titre" class="form-control" placeholder="ex: Statuts de l'AJBVA - Version 2024" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Catégorie <span class="form-required">*</span></label>
+          <select name="categorie" class="form-control form-select" required>
+            {% for cat in categories %}
+              <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fichier (PDF recommandé) <span class="form-required">*</span></label>
+          <input type="file" name="document" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Format acceptés : PDF, Word, Excel. Max 5 Mo.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description (optionnelle)</label>
+          <textarea name="description" class="form-control" rows="3" placeholder="Précisez le contenu ou l'usage du document..."></textarea>
+        </div>
+
+        <div class="mt-24">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-save"></i> Enregistrer le document
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+{% block title %}Tableau de Bord Financier Avancé{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title"><i class="fas fa-chart-line" style="color:#1a56db;"></i> Statistiques Financières</div>
+    <div class="page-subtitle">Analyse des flux de trésorerie et évolution du fonds social pour l'année {{ annee }}</div>
+  </div>
+  <div class="page-actions">
+    <form method="GET" class="form-inline" style="display:flex;gap:8px;">
+      <select name="annee" class="form-control form-select" onchange="this.form.submit()">
+        {% for y in range(date()|date('Y'), 2023) %}
+          <option value="{{ y }}" {{ y == annee ? 'selected' : '' }}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <a href="{{ path('cotisation_rapport') }}" class="btn btn-outline"><i class="fas fa-file-pdf"></i> Rapport PDF</a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));gap:24px;">
+  {# Graphique 1 : Recettes vs Dépenses #}
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-exchange-alt"></i> Recettes vs Dépenses (Mensuel)</span></div>
+    <div class="card-body">
+      <div style="height:300px;"><canvas id="chartRecettesDepenses"></canvas></div>
+    </div>
+  </div>
+
+  {# Graphique 2 : Évolution du Fonds Social #}
+  <div class="card">
+    <div class="card-header"><span class="card-title"><i class="fas fa-shield-alt"></i> Évolution du Fonds Social</span></div>
+    <div class="card-body">
+      <div style="height:300px;"><canvas id="chartFondsSocial"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-24">
+  <div class="card-header"><span class="card-title"><i class="fas fa-table"></i> Détails Mensuels {{ annee }}</span></div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mois</th>
+            <th>Recettes Totales</th>
+            <th>Dépenses (Assistances)</th>
+            <th>Solde Mensuel</th>
+            <th>Fonds Social (Entrées)</th>
+            <th>Fonds Social (Versé)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set moisFr = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'] %}
+          {% for m in 1..12 %}
+            {% set r = statsMensuelles[m] %}
+            {% set f = evolutionFondsSocial[m] %}
+            <tr>
+              <td><strong>{{ moisFr[m] }}</strong></td>
+              <td style="color:#16a34a;font-weight:700;">+ {{ r.recettes|number_format(0,',',' ') }} F</td>
+              <td style="color:#dc2626;font-weight:700;">- {{ r.depenses|number_format(0,',',' ') }} F</td>
+              <td style="font-weight:800; color:{{ (r.recettes - r.depenses) >= 0 ? '#1e293b' : '#dc2626' }};">
+                {{ (r.recettes - r.depenses)|number_format(0,',',' ') }} F
+              </td>
+              <td style="color:#1d4ed8;">{{ f.fonds|number_format(0,',',' ') }} F</td>
+              <td style="color:#9333ea;">{{ f['versé']|number_format(0,',',' ') }} F</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+
+  // Chart 1 : Recettes vs Dépenses
+  new Chart(document.getElementById('chartRecettesDepenses'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Recettes (Entrées)',
+          data: [{% for m in 1..12 %}{{ statsMensuelles[m].recettes }},{% endfor %}],
+          backgroundColor: '#10b981',
+          borderRadius: 4
+        },
+        {
+          label: 'Dépenses (Sorties)',
+          data: [{% for m in 1..12 %}{{ statsMensuelles[m].depenses }},{% endfor %}],
+          backgroundColor: '#ef4444',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+
+  // Chart 2 : Evolution Fonds Social
+  new Chart(document.getElementById('chartFondsSocial'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Entrées Fonds Social',
+          data: [{% for m in 1..12 %}{{ evolutionFondsSocial[m].fonds }},{% endfor %}],
+          borderColor: '#1d4ed8',
+          backgroundColor: '#1d4ed820',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Assistances Versées',
+          data: [{% for m in 1..12 %}{{ evolutionFondsSocial[m]['versé'] }},{% endfor %}],
+          borderColor: '#9333ea',
+          backgroundColor: '#9333ea20',
+          fill: true,
+          tension: 0.4
+        }
+      ]
+    },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+</script>
+{% endblock %}

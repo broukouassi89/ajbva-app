@@ -8,13 +8,25 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Inter',-apple-system,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;background:#0f172a}
-    .bg-shape{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
-    .bg-1{width:500px;height:500px;background:#1a56db;top:-100px;right:-100px}
-    .bg-2{width:400px;height:400px;background:#7c3aed;bottom:-80px;left:-80px}
-    .bg-3{width:300px;height:300px;background:#0ea5e9;top:50%;left:50%;transform:translate(-50%,-50%)}
-    .login-wrap{width:100%;max-width:420px;position:relative;z-index:10}
+
+    /* float animation for background blobs */
+    @keyframes float {
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-20px)}
+    }
+    .bg-shape{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15;animation:float 6s ease-in-out infinite}
+    .bg-1{width:500px;height:500px;background:#1a56db;top:-100px;right:-100px;animation-delay:0s}
+    .bg-2{width:400px;height:400px;background:#7c3aed;bottom:-80px;left:-80px;animation-delay:2s}
+    .bg-3{width:300px;height:300px;background:#0ea5e9;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:4s}
+
+    /* fade-in for container */
+    @keyframes fadeInUp {
+      0%{opacity:0;transform:translateY(20px)}
+      100%{opacity:1;transform:translateY(0)}
+    }
+    .login-wrap{width:100%;max-width:420px;position:relative;z-index:10;animation:fadeInUp .8s ease both}
     .login-header{text-align:center;margin-bottom:32px}
-    .login-logo{width:80px;height:80px;background:white;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#1a56db;margin-bottom:20px;box-shadow:0 8px 32px rgba(26,86,219,.3)}
+    .login-logo{width:80px;height:80px;background:white;border-radius:24px;display:inline-flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#1a56db;margin-bottom:20px;box-shadow:0 8px 32px rgba(26,86,219,.3);animation:fadeInUp .8s ease .2s both}
     .login-title{color:white;font-size:26px;font-weight:800;margin-bottom:6px}
     .login-sub{color:rgba(255,255,255,.5);font-size:13px}
     .login-card{background:white;border-radius:20px;padding:36px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
@@ -23,19 +35,34 @@
     .form-group{margin-bottom:18px}
     .form-label{display:block;font-size:13px;font-weight:600;color:#1e293b;margin-bottom:6px}
     .input-wrap{position:relative}
-    .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:15px}
+    .input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:15px;transition:color .3s}
     .form-control{width:100%;padding:11px 13px 11px 40px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#1e293b;outline:none;transition:border-color .2s,box-shadow .2s}
     .form-control:focus{border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.1)}
-    .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#1a56db,#3b82f6);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+    .input-wrap:focus-within .input-icon{color:#1a56db}
+    .btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#1a56db,#3b82f6);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
     .btn-login:hover{opacity:.9}
+    .btn-login:active{transform:scale(.98)}
+    /* loading spinner */
+    .spinner{display:none;width:20px;height:20px;border:3px solid rgba(255,255,255,.6);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .btn-login.loading .spinner{display:inline-block;margin-left:8px}
+    .btn-login.loading .btn-text{opacity:0}
+    /* shake on error */
+    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+    .has-error{animation:shake .3s ease-in-out}
     .alert-error{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:13.5px;display:flex;align-items:center;gap:8px}
     .login-accounts{margin-top:24px;background:#f8fafc;border-radius:12px;padding:16px}
     .login-accounts h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:700;margin-bottom:12px}
+    /* responsive tweaks */
+    @media(max-width:480px){body{padding:10px}.login-card{padding:24px}.login-logo{width:60px;height:60px;font-size:32px}}
     .account-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9}
     .account-item:last-child{border-bottom:none}
     .account-role{font-size:12px;font-weight:600;color:#1e293b}
     .account-cred{font-size:11px;color:#64748b;font-family:monospace}
     .footer-note{text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,.3)}
+  </style>
+</head>
+<body>
   </style>
 </head>
 <body>
@@ -50,7 +77,7 @@
       <div class="login-sub">Association des Jeunes de Botro Villages à Abidjan</div>
     </div>
 
-    <div class="login-card">
+    <div class="login-card {% if error %}has-error{% endif %}">
       <h2>Connexion</h2>
       <p class="login-desc">Accédez à votre espace de gestion associative</p>
 
@@ -81,7 +108,9 @@
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <button type="submit" class="btn-login">
-          <i class="fas fa-sign-in-alt"></i> Se connecter
+          <i class="fas fa-sign-in-alt"></i>
+          <span class="btn-text">Se connecter</span>
+          <span class="spinner" aria-hidden="true"></span>
         </button>
       </form>
 
@@ -107,7 +136,18 @@
       </div>
     </div>
 
-    <p class="footer-note">© {{ "now"|date("Y") }} AJBVA · Symfony 7 · Tous droits réservés</p>
+    <p class="footer-note">© {{ "now"|date("Y") }} AJBVA · Tous droits réservés</p>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded',function(){
+      const form=document.querySelector('form');
+      const btn=form.querySelector('.btn-login');
+      form.addEventListener('submit',function(){
+        btn.disabled=true;
+        btn.classList.add('loading');
+      });
+    });
+  </script>
 </body>
 </html>

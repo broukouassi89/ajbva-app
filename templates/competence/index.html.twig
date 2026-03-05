@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+{% block title %}Annuaire des Compétences{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title"><i class="fas fa-briefcase" style="color:#1a56db;"></i> Annuaire des Compétences</div>
+    <div class="page-subtitle">Favoriser l'entraide et le réseautage professionnel au sein de l'AJBVA</div>
+  </div>
+</div>
+
+<div class="card mb-24">
+  <div class="card-body">
+    <form method="GET" style="display:grid;grid-template-columns: 1fr 1fr auto;gap:16px;align-items:end;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Rechercher un métier ou un nom</label>
+        <input type="text" name="q" class="form-control" placeholder="ex: Comptable, Informatique..." value="{{ search }}">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Secteur d'activité</label>
+        <select name="secteur" class="form-control form-select">
+          <option value="">Tous les secteurs</option>
+          {% for s in secteurs %}
+            <option value="{{ s }}" {{ currentSecteur == s ? 'selected' : '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="height:42px;"><i class="fas fa-search"></i> Filtrer</button>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));gap:20px;">
+  {% for membre in membres %}
+    <div class="card" style="transition: transform .2s;">
+      <div class="card-body">
+        <div style="display:flex;gap:16px;align-items:center;">
+          <img src="{{ membre.photoUrl }}" class="avatar avatar-lg" onerror="this.src='/images/avatar-default.svg'">
+          <div style="flex:1;">
+            <div style="font-weight:800;font-size:16px;color:#1e293b;">{{ membre.nomComplet }}</div>
+            <div style="font-size:13px;color:#1a56db;font-weight:600;margin-top:2px;">{{ membre.profession|default('Membre AJBVA') }}</div>
+            <div style="margin-top:8px;">
+              <span class="badge" style="background:#eff6ff;color:#1d4ed8;font-size:11px;">
+                <i class="fas fa-tag"></i> {{ membre.secteurActivite|default('Non défini') }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <hr style="margin:16px 0;border-color:#f1f5f9;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;gap:10px;">
+            <a href="tel:{{ membre.telephone }}" class="btn btn-outline btn-sm" title="Appeler"><i class="fas fa-phone"></i></a>
+            {% if membre.email %}
+            <a href="mailto:{{ membre.email }}" class="btn btn-outline btn-sm" title="Email"><i class="fas fa-envelope"></i></a>
+            {% endif %}
+          </div>
+          <a href="{{ path('membre_show', {id: membre.id}) }}" class="btn btn-ghost btn-sm">Voir profil <i class="fas fa-chevron-right"></i></a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div style="grid-column: 1 / -1; text-align:center;padding:60px;background:white;border-radius:16px;border:1px dashed #e2e8f0;">
+      <i class="fas fa-search" style="font-size:40px;color:#cbd5e1;margin-bottom:16px;"></i>
+      <div style="color:#64748b;font-weight:600;">Aucun membre ne correspond à votre recherche.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
