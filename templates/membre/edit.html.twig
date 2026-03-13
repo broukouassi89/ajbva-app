@@ -100,19 +100,30 @@
     </div>
 
     {% if is_granted('ROLE_ADMIN') %}
+    {# ✅ Le bouton est lié au formulaire externe via form="form-delete-membre" #}
     <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:16px;">
       <div style="font-size:12px;color:#991b1b;font-weight:700;margin-bottom:10px;">⚠️ Zone dangereuse</div>
-      <form method="POST" action="{{ path('membre_delete', {id: membre.id}) }}"
-            onsubmit="return confirm('Supprimer définitivement {{ membre.nomComplet }} ? Cette action est irréversible.')">
-        <input type="hidden" name="_token" value="{{ csrf_token('delete_membre_' ~ membre.id) }}">
-        <button type="submit" class="btn btn-danger btn-sm" style="width:100%;justify-content:center;">
-          <i class="fas fa-trash-alt"></i> Supprimer ce membre
-        </button>
-      </form>
+      <button type="submit"
+              form="form-delete-membre"
+              class="btn btn-danger btn-sm"
+              style="width:100%;justify-content:center;"
+              onclick="return confirm('Supprimer définitivement {{ membre.nomComplet }} ? Cette action est irréversible.')">
+        <i class="fas fa-trash-alt"></i> Supprimer ce membre
+      </button>
     </div>
     {% endif %}
   </div>
 </div>
 
 {{ form_end(form) }}
+
+{# ✅ Formulaire de suppression placé EN DEHORS du formulaire principal #}
+{% if is_granted('ROLE_ADMIN') %}
+<form id="form-delete-membre"
+      method="POST"
+      action="{{ path('membre_delete', {id: membre.id}) }}">
+  <input type="hidden" name="_token" value="{{ csrf_token('delete_membre_' ~ membre.id) }}">
+</form>
+{% endif %}
+
 {% endblock %}
